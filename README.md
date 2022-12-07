@@ -11,7 +11,11 @@ import (
 )
 
 func asyncDivide(a, b int) *promise.Promise[int] {
-	p := promise.NewPromise[int]()
+	p := promise.NewPromise[int](
+		promise.WithRejectHandler[int](func(err error) {
+			log.Println("logging: ", err)
+		}),
+	)
 
 	go func() {
 		if b == 0 {
