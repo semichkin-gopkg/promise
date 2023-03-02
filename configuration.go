@@ -1,7 +1,7 @@
 package promise
 
 import (
-	"github.com/semichkin-gopkg/configurator"
+	"github.com/semichkin-gopkg/conf"
 )
 
 type Configuration[T any] struct {
@@ -9,7 +9,7 @@ type Configuration[T any] struct {
 	RejectHandlers  []func(err error)
 }
 
-func WithResolveHandler[T any](handler func(payload T)) configurator.Updater[Configuration[T]] {
+func WithResolveHandler[T any](handler func(payload T)) conf.Updater[Configuration[T]] {
 	return func(c *Configuration[T]) {
 		if handler != nil {
 			c.ResolveHandlers = append(c.ResolveHandlers, handler)
@@ -17,7 +17,7 @@ func WithResolveHandler[T any](handler func(payload T)) configurator.Updater[Con
 	}
 }
 
-func WithRejectHandler[T any](handler func(err error)) configurator.Updater[Configuration[T]] {
+func WithRejectHandler[T any](handler func(err error)) conf.Updater[Configuration[T]] {
 	return func(c *Configuration[T]) {
 		if handler != nil {
 			c.RejectHandlers = append(c.RejectHandlers, handler)

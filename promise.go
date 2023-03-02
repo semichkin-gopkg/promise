@@ -3,7 +3,7 @@ package promise
 import (
 	"context"
 	"errors"
-	"github.com/semichkin-gopkg/configurator"
+	"github.com/semichkin-gopkg/conf"
 )
 
 var ErrCanceled = errors.New("promise: canceled by ctx.Done")
@@ -22,28 +22,28 @@ type Promise[T any] struct {
 }
 
 func NewPromise[T any](
-	updaters ...configurator.Updater[Configuration[T]],
+	updaters ...conf.Updater[Configuration[T]],
 ) *Promise[T] {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	return &Promise[T]{
-		configuration: configurator.New[Configuration[T]]().
+		configuration: conf.NewBuilder[Configuration[T]]().
 			Append(updaters...).
-			Apply(),
+			Build(),
 		doneCtx:    ctx,
 		notifyDone: cancel,
 	}
 }
 
 func (p *Promise[T]) Apply(
-	updaters ...configurator.Updater[Configuration[T]],
+	updaters ...conf.Updater[Configuration[T]],
 ) {
-	p.configuration = configurator.New[Configuration[T]]().
+	p.configuration = conf.NewBuilder[Configuration[T]]().
 		Append(func(c *Configuration[T]) {
 			*c = p.configuration
 		}).
 		Append(updaters...).
-		Apply()
+		Build()
 }
 
 func (p *Promise[T]) Resolve(payload T) {
