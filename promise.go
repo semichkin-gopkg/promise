@@ -14,7 +14,7 @@ type Response[T any] struct {
 }
 
 type Promise[T any] struct {
-	configuration Configuration[T]
+	config Conf[T]
 
 	doneCtx    context.Context
 	notifyDone context.CancelFunc
@@ -22,12 +22,12 @@ type Promise[T any] struct {
 }
 
 func NewPromise[T any](
-	updaters ...conf.Updater[Configuration[T]],
+	updaters ...conf.Updater[Conf[T]],
 ) *Promise[T] {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	return &Promise[T]{
-		configuration: conf.NewBuilder[Configuration[T]]().
+		config: conf.New[Conf[T]]().
 			Append(updaters...).
 			Build(),
 		doneCtx:    ctx,
@@ -36,11 +36,11 @@ func NewPromise[T any](
 }
 
 func (p *Promise[T]) Apply(
-	updaters ...conf.Updater[Configuration[T]],
+	updaters ...conf.Updater[Conf[T]],
 ) {
-	p.configuration = conf.NewBuilder[Configuration[T]]().
-		Append(func(c *Configuration[T]) {
-			*c = p.configuration
+	p.config = conf.New[Conf[T]]().
+		Append(func(c *Conf[T]) {
+			*c = p.config
 		}).
 		Append(updaters...).
 		Build()
@@ -51,7 +51,7 @@ func (p *Promise[T]) Resolve(payload T) {
 		return
 	}
 
-	for _, h := range p.configuration.ResolveHandlers {
+	for _, h := range p.config.ResolveHandlers {
 		h(payload)
 	}
 
@@ -64,7 +64,7 @@ func (p *Promise[T]) Reject(err error) {
 		return
 	}
 
-	for _, h := range p.configuration.RejectHandlers {
+	for _, h := range p.config.RejectHandlers {
 		h(err)
 	}
 
